@@ -1,4 +1,4 @@
-
+- [OSCP](#Commands)
 - [Enumeracion](#Enumeracion)
 - [Password Attacks](#password-attacks)
 - [File Transfers](#file-transfers)
@@ -11,6 +11,52 @@
 - [Pivoting](#pivoting)
 - [Exfiltración de datos](#exfiltracion)
 - [Limpiando huellas](#limpiar-huellas)
+
+# Commands
+
+Comandos y herramientas que se encuentran en el documento de PWK
+
+```sh
+whois megacorpone.com -h 192.168.50.251
+whois 38.100.193.70 -h 192.168.50.251
+```
+
+Usar google hacking
+
+filetype:txt
+site:megacorpone.com
+intitle:“index of” “parent directory”
+
+## DNS
+
+```sh
+host -t mx megacorpone.com
+host -t txt megacorpone.com
+for ip in $(cat list.txt); do host $ip.megacorpone.com; done
+for ip in $(seq 200 254); do host 51.222.169.$ip; done | grep -v "not found"
+dnsrecon -d megacorpone.com -t std
+dnsrecon -d megacorpone.com -D ~/list.txt -t brt
+dnsenum megacorpone.com
+nslookup mail.megacorptwo.com
+nslookup -type=TXT info.megacorptwo.com 192.168.50.151
+```
+
+## TCP/UDP
+
+nc -nvv -w 1 -z 192.168.50.152 3388-3390
+nc -nv -u -z -w 1 192.168.50.149 120-123
+
+### Powershell
+
+```cmd
+Test-NetConnection -Port 445 192.168.50.151
+1..1024 | % {echo ((New-Object 
+Net.Sockets.TcpClient).Connect("192.168.50.151", $_)) "TCP port $_ is open"} 2>$null
+```
+
+## SMB
+
+sudo nbtscan -r 192.168.50.0/24
 
 # Enumeracion
 
