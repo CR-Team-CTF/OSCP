@@ -10,7 +10,7 @@
 - [Pivoting](#pivoting)
 - [Evasion de antivirus](#evasion-de-antivirus)
 - [Exfiltración de datos](#exfiltración-de-datos)
-- [Limpiando huellas](#limpiar-huellas)
+- [Limpiando huellas](#limpiando-huellas)
 - [Tips](#tips)
 
 # Commands
