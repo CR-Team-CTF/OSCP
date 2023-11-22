@@ -277,6 +277,40 @@ pattern
 {GOBUSTER}/v2
 ```
 
+## Windows 
+
+Obtener el Domain
+``` cmd
+[System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
+```
+
+## Sharphound
+
+Import-Module .\Sharphound.ps1
+https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/bloodhound
+
+## Powerview
+
+PS C:\Tools> Import-Module .\PowerView.ps1
+
+https://book.hacktricks.xyz/windows-hardening/basic-powershell-for-pentesters/powerview
+
+## Service Principal Names
+
+c:\Tools>setspn -L iis_service
+Registered ServicePrincipalNames for CN=iis_service,CN=Users,DC=corp,DC=com:
+ HTTP/web04.corp.com
+ HTTP/web04
+ HTTP/web04.corp.com:80
+
+Get-NetUser -SPN | select samaccountname,serviceprincipalname
+samaccountname serviceprincipalname
+-------------- --------------------
+krbtgt kadmin/changepw
+iis_service {HTTP/web04.corp.com, HTTP/web04, HTTP/web04.corp.com:80
+
+nslookup.exe web04.corp.com
+
 # Password Attacks
 
 ```sh
@@ -610,6 +644,10 @@ targets left!
 [*] Executed specified command on host: 192.168.50.212
 ```
 Ya con esto deberíamos ser capaces de obtener root en la maquina
+
+## Active directory
+
+
 
 # Persistencia
 ```sh
