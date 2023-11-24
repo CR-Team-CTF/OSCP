@@ -1,0 +1,29 @@
+# Nmap 7.94 scan initiated Wed Nov 22 19:51:15 2023 as: nmap -p- --open -vvv --min-rate 5000 -sS -Pn -oN 10.10.11.174.nmap 10.10.11.174
+Nmap scan report for 10.10.11.174
+Host is up, received user-set (0.087s latency).
+Scanned at 2023-11-22 19:51:15 EST for 52s
+Not shown: 65516 filtered tcp ports (no-response)
+Some closed ports may be reported as filtered due to --defeat-rst-ratelimit
+PORT      STATE SERVICE          REASON
+53/tcp    open  domain           syn-ack ttl 127
+88/tcp    open  kerberos-sec     syn-ack ttl 127
+135/tcp   open  msrpc            syn-ack ttl 127
+139/tcp   open  netbios-ssn      syn-ack ttl 127
+389/tcp   open  ldap             syn-ack ttl 127
+445/tcp   open  microsoft-ds     syn-ack ttl 127
+464/tcp   open  kpasswd5         syn-ack ttl 127
+593/tcp   open  http-rpc-epmap   syn-ack ttl 127
+636/tcp   open  ldapssl          syn-ack ttl 127
+3268/tcp  open  globalcatLDAP    syn-ack ttl 127
+3269/tcp  open  globalcatLDAPssl syn-ack ttl 127
+5985/tcp  open  wsman            syn-ack ttl 127
+9389/tcp  open  adws             syn-ack ttl 127
+49664/tcp open  unknown          syn-ack ttl 127
+49668/tcp open  unknown          syn-ack ttl 127
+49674/tcp open  unknown          syn-ack ttl 127
+49679/tcp open  unknown          syn-ack ttl 127
+49703/tcp open  unknown          syn-ack ttl 127
+63151/tcp open  unknown          syn-ack ttl 127
+
+Read data files from: /usr/bin/../share/nmap
+# Nmap done at Wed Nov 22 19:52:07 2023 -- 1 IP address (1 host up) scanned in 52.75 seconds
