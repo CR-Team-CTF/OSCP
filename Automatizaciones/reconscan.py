@@ -22,6 +22,7 @@ def nmapScan(ip_address):
    #sudo nmap -sVC -p135,139,445 10.10.10.4 -oN nmap.service
    #sudo nmap -sV -p 443 --script "vuln" 192.168.50.124
    TCPSCAN = "nmap -p- --open -vvv --min-rate 5000 -sS -Pn -oN '%s.nmap' %s"  % (ip_address, ip_address)
+   print TCPSCAN
    #TCPSCAN = "nmap -vv -Pn -A -sC -sS -T 4 -p- --min-rate 5000 -oN '%s.nmap' %s"  % (ip_address, ip_address, ip_address)
    UDPSCAN = "nmap -vv -Pn -A -sC -sU -T 4 --top-ports 200 --min-rate 5000 -oN '%sU.nmap' %s" % (ip_address, ip_address)
    results = subprocess.check_output(TCPSCAN, shell=True)
@@ -47,7 +48,8 @@ def nmapScan(ip_address):
 
    port_scan = ''.join(str(p)+"," for p in port_list)[:-1]
    print "INFO: TCP/UDP Nmap scans completed for " + ip_address 
-   SERVICESCAN = "nmap -sVC --script 'vuln' -p%s -oN '%s.service' %s"  % (port_scan, ip_address, ip_address)  
+   SERVICESCAN = "nmap -sVC -p%s -oN '%s.service' %s"  % (port_scan, ip_address, ip_address)  
+   print SERVICESCAN
    subprocess.check_output(SERVICESCAN, shell=True)
    print "INFO: Service scan completed for " + ip_address 
    return

