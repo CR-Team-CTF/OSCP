@@ -1,0 +1,21 @@
+# Nmap 7.94 scan initiated Tue Nov 28 20:41:56 2023 as: nmap -sVC -p464,636,49667,49687 -oN 10.10.11.202.service 10.10.11.202
+Nmap scan report for 10.10.11.202
+Host is up (0.14s latency).
+
+PORT      STATE SERVICE    VERSION
+464/tcp   open  kpasswd5?
+636/tcp   open  ssl/ldap   Microsoft Windows Active Directory LDAP (Domain: sequel.htb0., Site: Default-First-Site-Name)
+| ssl-cert: Subject: 
+| Subject Alternative Name: DNS:dc.sequel.htb, DNS:sequel.htb, DNS:sequel
+| Not valid before: 2022-11-18T21:05:34
+|_Not valid after:  2023-11-18T21:05:34
+|_ssl-date: 2023-11-29T09:42:58+00:00; +7h59m59s from scanner time.
+49667/tcp open  msrpc      Microsoft Windows RPC
+49687/tcp open  ncacn_http Microsoft Windows RPC over HTTP 1.0
+Service Info: Host: DC; OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Host script results:
+|_clock-skew: 7h59m58s
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Tue Nov 28 20:42:59 2023 -- 1 IP address (1 host up) scanned in 62.88 seconds

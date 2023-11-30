@@ -1,0 +1,43 @@
+# Nmap 7.94 scan initiated Tue Nov 28 19:14:40 2023 as: nmap -sVC -p88,135,139,445,593,636,5985,49664,49665,49676 -oN 10.10.10.161.service 10.10.10.161
+Nmap scan report for 10.10.10.161
+Host is up (0.096s latency).
+
+PORT      STATE SERVICE      VERSION
+88/tcp    open  kerberos-sec Microsoft Windows Kerberos (server time: 2023-11-29 00:21:36Z)
+135/tcp   open  msrpc        Microsoft Windows RPC
+139/tcp   open  netbios-ssn  Microsoft Windows netbios-ssn
+445/tcp   open  À1Å¿ˆU       Windows Server 2016 Standard 14393 microsoft-ds (workgroup: HTB)
+593/tcp   open  ncacn_http   Microsoft Windows RPC over HTTP 1.0
+636/tcp   open  tcpwrapped
+5985/tcp  open  http         Microsoft HTTPAPI httpd 2.0 (SSDP/UPnP)
+|_http-server-header: Microsoft-HTTPAPI/2.0
+|_http-title: Not Found
+49664/tcp open  msrpc        Microsoft Windows RPC
+49665/tcp open  msrpc        Microsoft Windows RPC
+49676/tcp open  ncacn_http   Microsoft Windows RPC over HTTP 1.0
+Service Info: Host: FOREST; OS: Windows; CPE: cpe:/o:microsoft:windows
+
+Host script results:
+| smb2-security-mode: 
+|   3:1:1: 
+|_    Message signing enabled and required
+| smb-os-discovery: 
+|   OS: Windows Server 2016 Standard 14393 (Windows Server 2016 Standard 6.3)
+|   Computer name: FOREST
+|   NetBIOS computer name: FOREST\x00
+|   Domain name: htb.local
+|   Forest name: htb.local
+|   FQDN: FOREST.htb.local
+|_  System time: 2023-11-28T16:22:30-08:00
+|_clock-skew: mean: 2h46m50s, deviation: 4h37m10s, median: 6m48s
+| smb2-time: 
+|   date: 2023-11-29T00:22:26
+|_  start_date: 2023-11-29T00:20:07
+| smb-security-mode: 
+|   account_used: guest
+|   authentication_level: user
+|   challenge_response: supported
+|_  message_signing: required
+
+Service detection performed. Please report any incorrect results at https://nmap.org/submit/ .
+# Nmap done at Tue Nov 28 19:15:47 2023 -- 1 IP address (1 host up) scanned in 67.51 seconds

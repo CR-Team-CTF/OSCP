@@ -1,0 +1,14 @@
+# Nmap 7.94 scan initiated Tue Nov 28 20:40:56 2023 as: nmap -p- --open -vvv --min-rate 5000 -sS -Pn -oN 10.10.11.202.nmap 10.10.11.202
+Nmap scan report for 10.10.11.202
+Host is up, received user-set (0.15s latency).
+Scanned at 2023-11-28 20:40:56 EST for 38s
+Not shown: 55799 filtered tcp ports (no-response), 9732 closed tcp ports (reset)
+Some closed ports may be reported as filtered due to --defeat-rst-ratelimit
+PORT      STATE SERVICE  REASON
+464/tcp   open  kpasswd5 syn-ack ttl 127
+636/tcp   open  ldapssl  syn-ack ttl 127
+49667/tcp open  unknown  syn-ack ttl 127
+49687/tcp open  unknown  syn-ack ttl 127
+
+Read data files from: /usr/bin/../share/nmap
+# Nmap done at Tue Nov 28 20:41:34 2023 -- 1 IP address (1 host up) scanned in 37.96 seconds

